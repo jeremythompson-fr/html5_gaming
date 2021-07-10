@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+
+    <link href="style.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="assets/cockroach.png" />
+    <title>Tor network</title>
+
+</head>
+
+<body>
+<script>
+    window.onload = function () {
+        var config = {
+            type: Phaser.AUTO,
+            width: 1920,
+            height: 1080,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: [home, options, niveau1, niveau2, niveau3],
+            audio: {
+                disableWebAudio: true
+            }
+        };
+        var game = new Phaser.Game(config);
+        game.scene.start("selectWorld");
+    }
+
+    var music;
+
+    var operator;
+    var wall;
+    var cursors;
+
+    var zone;
+    var zone1;
+    var zone2;
+    var zone3;
+
+    var folder;
+    var collectFolder;
+    var score;
+    var scoreText;
+
+    var antivirus;
+    var antivirus2;
+    var antivirus3;
+    var firewall;
+
+    var gameOver;
+    var textGameover;
+    var textSuccess;
+    var buttonSuccess;
+
+    //  HOME
+    class home extends Phaser.Scene {
+
+        constructor() {
+            super({ key: 'home' });
+        }
+
+        preload() {
+            this.load.image('artwork', 'assets/Artwork.jpg');
+            this.load.image('button', './assets/jouer.png');
+            this.load.image('button_options', './assets/regles.png')
+
+        }
+
+        create() {
+
+            this.add.image(960, 540, 'artwork');
+
+            var button = this.add.image(677, 727, 'button').setScale(0.7).setInteractive();
+            button.on('pointerdown', function () {
+                this.scene.start('niveau1');
+            }, this);
+
+            var button = this.add.image(677, 830, 'button_options').setScale(0.7).setInteractive();
+            button.on('pointerdown', function () {
+                this.scene.start('options');
+            }, this);
+        }
+
+    }
+
+    // OPTIONS
+    class options extends Phaser.Scene {
+
+        constructor() {
+            super({ key: 'options' });
+        }
+
+        preload() {
+            this.load.image('rules', './assets/rules.jpg');
+            this.load.image('return', './assets/retours.png');
+        }
+
+        create() {
+
+            this.add.image(960, 540, 'rules');
+
+            var button = this.add.image(228, 1001, 'return').setScale(0.7).setInteractive();
+            button.on('pointerdown', function () {
+                this.scene.start('home');
+            }, this);
+        }
+    }
+
+
+    //  NIVEAU 1
+    class niveau1 extends Phaser.Scene {
+        constructor() {
+            super({
+                key: 'niveau1'
+            });
+        }
+        preload() {
+            this.load.image('BG', 'assets/BG.jpg');
+            this.load.image('ground', 'assets/map_1/ground1.png');
+            this.load.image('w1', 'assets/map_1/W1.png');
+            this.load.image('w2', 'assets/map_1/W2.png');
+            this.load.image('w3', 'assets/map_1/W3.png');
+            this.load.image('w4', 'assets/map_1/W4.png');
+            this.load.image('w5', 'assets/map_1/W5.png');
+            this.load.image('w6', 'assets/map_1/W6.png');
+            this.load.image('operator', 'assets/cockroach.png', { frameWidth: 32, frameHeight: 48 });
+
+            this.load.audio('theme', 'assets/music/ApocalypticTrailerMusic.wav');
+            this.load.audio('sound_collect', 'assets/music/sound_collect.mp3');
+            this.load.audio('sound_gameover', 'assets/music/sound_gameover.mp3');
+
+            this.load.image('zone', 'assets/objets/zone.png');
+            this.load.image('folder', 'assets/objets/folder.png');
+            this.load.image('antivirus', 'assets/objets/antivirus.png');
+
+            this.load.image('button', './assets/jouer.png');
+            this.load.image('return', './assets/retours.png');
+        }
+
+        create() {
+            //music
+            music = this.sound.add('theme');
+            music.loop = true;
+            music.play();
+
+            this.add.image(960, 540, 'BG');
+            this.add.image(960, 540, 'ground');
+
+            var button = this.add.image(130, 150, 'return').setScale(0.4, 0.4).setInteractive();
+            button.on('pointerdown', function () {
+                music.stop();
+                this.scene.start('home')
+            }, this);
+
+            scoreText = this.add.text(600, 100, 'fichier(s) à récupérer : 1', { fontSize: '24px', fill: 'red' });
+            score = 1;
+
+            wall = this.physics.add.staticGroup();
+            wall.create(314, 317, 'w1');
+            wall.create(990.5, 177.5, 'w2');
+            wall.create(1606.5, 347, 'w3');
+            wall.create(314, 763.5, 'w4');
+            wall.create(990.5, 903.5, 'w5');
+            wall.create(1606.5, 733.5, 'w6');
+
+            zone = this.add.sprite(85, 540, 'zone');
+            zone1 = this.add.sprite(1833, 540, 'zone');
+
+            //operator
+            operator = this.physics.add.image(50, 540, 'operator').setScale(0.07);
+            operator.setCollideWorldBounds(true);
+            this.physics.add.collider(operator, wall);
+            cursors = this.input.keyboard.createCursorKeys();
+
+            var style = { font: "bold 32px Arial", fill: "#fff" };
+            var text = this.add.text(900, 50, "SERVEUR 1", style);
+
+            // folder
+            folder = this.physics.add.group();
+            folder.create(900, 700, 'folder').setScale(0.1);
+            this.physics.add.overlap(operator, folder, collectFolder, null, this);
+
+            // antivirus
+            antivirus = this.physics.add.group({
+                key: 'antivirus',
+                repeat: 4,
+                setXY: { x: 650, y: 400, stepX: 150 }
+            });
+
+            antivirus.children.iterate(function (child) {
+                child.setScale(0.1);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(0, -600);
+                child.allowGravity = false;
+            });
+            this.physics.add.collider(antivirus, wall);
+            this.physics.add.collider(operator, antivirus, hitAntivirus, null, this);
+        }
+
+        update() {
+            if (cursors.left.isDown) {
+                operator.setVelocityX(-400);
+            }
+            else if (cursors.right.isDown) {
+                operator.setVelocityX(400);
+            }
+            else {
+                operator.setVelocityX(0);
+            }
+
+            if (cursors.up.isDown) {
+                operator.setVelocityY(-400);
+            }
+            else if (cursors.down.isDown) {
+                operator.setVelocityY(400);
+            }
+            else {
+                operator.setVelocityY(0);
+            }
+            if (Phaser.Input.Keyboard.JustDown(cursors.space) && checkOverlap(operator, zone1) && score == 0) {
+                this.scene.start("niveau2");
+            } 
+        }
+    }
+
+
+    // NIVEAU 2
+
+    class niveau2 extends Phaser.Scene {
+        constructor() {
+            super({
+                key: 'niveau2'
+            });
+        }
+        preload() {
+            this.load.image('BG', 'assets/BG.jpg');
+            this.load.image('ground', 'assets/map_1/ground1.png');
+            this.load.image('w1', 'assets/map_1/W1.png');
+            this.load.image('w2', 'assets/map_1/W2.png');
+            this.load.image('w3', 'assets/map_1/W3.png');
+            this.load.image('w4', 'assets/map_1/W4.png');
+            this.load.image('w5', 'assets/map_1/W5.png');
+            this.load.image('w6', 'assets/map_1/W6.png');
+            this.load.image('operator', 'assets/cockroach.png', { frameWidth: 32, frameHeight: 48 });
+
+            this.load.audio('theme', 'assets/music/ApocalypticTrailerMusic.wav');
+            this.load.audio('sound_collect', 'assets/music/sound_collect.mp3');
+            this.load.audio('sound_gameover', 'assets/music/sound_gameover.mp3');
+
+            this.load.image('zone', 'assets/objets/zone.png');
+            this.load.image('folder', 'assets/objets/folder.png');
+            this.load.image('antivirus', 'assets/objets/antivirus.png');
+            this.load.image('firewall', 'assets/objets/firewall.png');
+
+            this.load.image('button', './assets/jouer.png');
+            this.load.image('return', './assets/retours.png');
+        }
+
+        create() {
+            this.add.image(960, 540, 'BG');
+            this.add.image(960, 540, 'ground');
+
+            var button = this.add.image(130, 150, 'return').setScale(0.4, 0.4).setInteractive();
+            button.on('pointerdown', function () {
+                music.stop();
+                this.scene.start('home')
+            }, this);
+            
+            var style = { font: "bold 32px Arial", fill: "#fff" };
+            var text = this.add.text(900, 50, "SERVEUR 2", style);
+
+            wall = this.physics.add.staticGroup();
+
+            wall.create(314, 317, 'w1');
+            wall.create(990.5, 177.5, 'w2');
+            wall.create(1606.5, 347, 'w3');
+            wall.create(314, 763.5, 'w4');
+            wall.create(990.5, 903.5, 'w5');
+            wall.create(1606.5, 733.5, 'w6');
+
+            firewall = this.physics.add.staticGroup();
+            firewall.create(774, 312, 'firewall');
+            firewall.create(774, 768, 'firewall');
+            firewall.create(774, 540, 'firewall');
+            firewall.create(960, 426, 'firewall');
+            firewall.create(960, 654, 'firewall');
+            firewall.create(1142, 312, 'firewall');
+            firewall.create(1142, 768, 'firewall');
+            firewall.create(1142, 540, 'firewall');
+            
+            zone = this.add.sprite(85, 540, 'zone');
+            zone2 = this.add.sprite(1833, 540, 'zone');
+            
+            operator = this.physics.add.image(50, 540, 'operator').setScale(0.07);
+            operator.setCollideWorldBounds(true);
+            cursors = this.input.keyboard.createCursorKeys();   
+
+            // folder
+            folder = this.physics.add.group();
+            folder.create(1000, 250, 'folder').setScale(0.1);
+            folder.create(800, 600, 'folder').setScale(0.1);
+            this.physics.add.overlap(operator, folder, collectFolder, null, this);
+
+            scoreText = this.add.text(600, 100, 'fichier(s) à récupérer : 2', { fontSize: '24px', fill: 'red' });
+            score = 2;
+
+            // antivirus
+            antivirus = this.physics.add.group({
+                key: 'antivirus',
+                repeat: 1,
+                setXY: { x: 650, y: 330, stepY: 160 }
+            });
+
+            antivirus.children.iterate(function (child) {
+                child.setScale(0.1);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(100, 200);
+                child.allowGravity = false;
+            });
+
+            this.physics.add.collider(antivirus, wall);
+            this.physics.add.collider(antivirus, firewall);
+            this.physics.add.collider(operator, antivirus, hitAntivirus, null, this);
+
+            antivirus2 = this.physics.add.group({
+                key: 'antivirus',
+                repeat: 1,
+                setXY: { x: 700, y: 350, stepX: 500 }
+            });
+
+            antivirus2.children.iterate(function (child) {
+                child.setScale(0.1);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(100, -200);
+                child.allowGravity = false;
+            });
+            this.physics.add.collider(antivirus2, wall);
+            this.physics.add.collider(antivirus2, firewall);
+            this.physics.add.collider(operator, antivirus2, hitAntivirus, null, this);
+
+            this.physics.add.collider(operator, wall);
+            this.physics.add.collider(operator, firewall, hitAntivirus, null, this);
+        }
+
+        update() {
+            if (cursors.left.isDown) {
+                operator.setVelocityX(-400);
+            }
+            else if (cursors.right.isDown) {
+                operator.setVelocityX(400);
+            }
+            else {
+                operator.setVelocityX(0);
+            }
+
+            if (cursors.up.isDown) {
+                operator.setVelocityY(-400);
+            }
+            else if (cursors.down.isDown) {
+                operator.setVelocityY(400);
+            }
+            else {
+                operator.setVelocityY(0);
+            }
+            if (Phaser.Input.Keyboard.JustDown(cursors.space) && checkOverlap(operator, zone2) && score == 0) {
+                this.scene.start("niveau3");
+            }
+        }
+    }
+
+    // NIVEAU 3
+
+    class niveau3 extends Phaser.Scene {
+        constructor() {
+            super({
+                key: 'niveau3'
+            });
+        }
+        preload() {
+            this.load.image('BG3', 'assets/map_3/BG.jpg');
+            this.load.image('ground3', 'assets/map_3/ground.png');
+            this.load.image('wall1', 'assets/map_3/w1.png');
+            this.load.image('wall2', 'assets/map_3/w2.png');
+            this.load.image('wall3', 'assets/map_3/w3.png');
+            this.load.image('wall4', 'assets/map_3/w4.png');
+            this.load.image('wall6', 'assets/map_3/w6.png');
+            this.load.image('wall7', 'assets/map_3/w7.png');
+            this.load.image('wall8', 'assets/map_3/w8.png');
+            this.load.image('wall10', 'assets/map_3/w10.png');
+            this.load.image('wall11', 'assets/map_3/w11.png');
+            this.load.image('wall12', 'assets/map_3/w12.png');
+            this.load.image('wall13', 'assets/map_3/w13.png');
+            this.load.image('wall14', 'assets/map_3/w14.png');
+            this.load.image('wall15', 'assets/map_3/w15.png');
+            this.load.image('wall16', 'assets/map_3/w16.png');
+            this.load.image('operator', 'assets/cockroach.png', { frameWidth: 32, frameHeight: 48 });
+
+            this.load.image('zone', 'assets/objets/zone.png');
+            this.load.image('folder', 'assets/objets/folder.png');
+            this.load.image('antivirus', 'assets/objets/antivirus.png');
+
+            this.load.audio('theme', 'assets/music/ApocalypticTrailerMusic.wav');
+            this.load.audio('sound_collect', 'assets/music/sound_collect.mp3');
+            this.load.audio('sound_gameover', 'assets/music/sound_gameover.mp3');
+            this.load.audio('sound_win', 'assets/music/sound_win.mp3');
+
+            this.load.image('button', './assets/jouer.png');
+            this.load.image('return', './assets/retours.png');
+        }
+
+        create() {
+
+            this.add.image(960, 540, 'BG3');
+            this.add.image(960, 540, 'ground3');
+
+            var button = this.add.image(130, 150, 'return').setScale(0.4, 0.4).setInteractive();
+            button.on('pointerdown', function () {
+                music.stop();
+                this.scene.start('home')
+            }, this);
+
+            var style = { font: "bold 32px Arial", fill: "#fff" };
+            var text = this.add.text(900, 30, "SERVEUR 3", style);
+
+            wall = this.physics.add.staticGroup();
+            wall.create(110, 794, 'wall1');
+            wall.create(162, 559, 'wall2');
+            wall.create(195.5, 281, 'wall3');
+            wall.create(1075, 112.5, 'wall4');
+            wall.create(615.5, 342, 'wall6');
+            wall.create(615.5, 794, 'wall7');
+            wall.create(615.5, 568, 'wall8');
+            wall.create(1465.5, 342, 'wall10');
+            wall.create(1211, 486, 'wall11');
+            wall.create(1572.5, 572.5, 'wall12');
+            wall.create(1538.5, 852, 'wall13');
+            wall.create(757, 1023.5, 'wall14');
+            wall.create(1211, 657, 'wall15');
+            wall.create(1211, 791.5, 'wall16');
+
+            zone = this.add.sprite(85.5, 963, 'zone');
+            zone3 = this.add.sprite(1834.5, 173, 'zone');
+
+            operator = this.physics.add.image(86, 964, 'operator').setScale(0.07);
+            operator.setCollideWorldBounds(true);
+            this.physics.add.collider(operator, wall);
+            cursors = this.input.keyboard.createCursorKeys();
+
+                // folder
+            folder = this.physics.add.group();
+            folder.create(271, 568, 'folder').setScale(0.1);
+            folder.create(960, 568, 'folder').setScale(0.1);
+            folder.create(1463, 568, 'folder').setScale(0.1);
+            this.physics.add.overlap(operator, folder, collectFolder, null, this);
+
+            scoreText = this.add.text(500, 60, 'fichier(s) à récupérer : 3', { fontSize: '24px', fill: 'red' });
+            score = 3;
+
+            // antivirus
+            antivirus = this.physics.add.group({
+                key: 'antivirus',
+                repeat: 1,
+                setXY: { x: 200, y: 700, stepY: 160 }
+            });
+            antivirus.children.iterate(function (child) {
+                child.setScale(0.1);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(100, -200);
+                child.allowGravity = false;
+
+            });
+            this.physics.add.collider(antivirus, wall);
+            this.physics.add.collider(operator, antivirus, hitAntivirus, null, this);
+
+            //antivirus ne rebondit sur les murs
+            antivirus2 = this.physics.add.group({
+                key: 'antivirus',
+                repeat: 3,
+                setXY: { x: 200, y: 350, stepX: 500 }
+            });
+            antivirus2.children.iterate(function (child) {
+                child.setScale(0.1);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(0, -800);
+                child.allowGravity = false;
+
+            });
+            this.physics.add.collider(operator, antivirus2, hitAntivirus, null, this);
+
+
+            antivirus3 = this.physics.add.group({
+                key: 'antivirus',
+                repeat: 1,
+                setXY: { x: 600, y: 350, stepY: 160 }
+            });
+            antivirus3.children.iterate(function (child) {
+                child.setScale(0.1);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(100, 200);
+                child.allowGravity = false;
+
+            });
+            this.physics.add.collider(antivirus3, wall);
+            this.physics.add.collider(operator, antivirus3, hitAntivirus, null, this);
+        }
+
+        update() {
+
+            if (cursors.left.isDown) {
+                operator.setVelocityX(-400);
+            }
+            else if (cursors.right.isDown) {
+                operator.setVelocityX(400);
+            }
+            else {
+                operator.setVelocityX(0);
+            }
+
+            if (cursors.up.isDown) {
+                operator.setVelocityY(-400);
+            }
+            else if (cursors.down.isDown) {
+                operator.setVelocityY(400);
+            }
+            else {
+                operator.setVelocityY(0);
+            }
+            if (Phaser.Input.Keyboard.JustDown(cursors.space) && checkOverlap(operator, zone3) && score == 0) {
+                this.physics.pause();
+                music.stop();
+                var style = { font: "bold 60px Arial", fill: "yellow"};
+                textSuccess = this.add.text(700, 300, "Merci pour votre devoir\nMISSION ACCOMPLIE !", style);
+                textSuccess.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+
+                var musicWin = this.sound.add('sound_win');
+                musicWin.play();
+
+                buttonSuccess = this.add.image(980, 700, 'button').setScale(0.5, 0.5).setInteractive();
+                buttonSuccess.on('pointerdown', function () {
+                    this.scene.start('home');
+                }, this);
+            }
+        }
+    }
+    
+    //collect folder
+    function collectFolder(operator, folder) {
+        folder.disableBody(true, true);
+
+        score -= 1;
+        scoreText.setText('fichier(s) à récupérer : ' + score);
+        var music = this.sound.add('sound_collect');
+        music.play();
+    }
+
+    // hit antivirus
+    function hitAntivirus(operator) {
+        this.physics.pause();
+
+        gameOver = true;
+
+        var musicGameover = this.sound.add('sound_gameover');
+        musicGameover.play();
+
+        var style = { font: "bold 32px Arial", fill: "#fff" };
+        textGameover = this.add.text(880, 500, "GAME OVER", style);
+        textGameover.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+
+        this.registry.destroy();
+        this.events.off();
+
+        var button = this.add.image(980, 700, 'button').setScale(0.5, 0.5).setInteractive();
+        button.on('pointerdown', function () {
+            this.scene.restart();
+        }, this);
+    }
+
+    function checkOverlap(spriteA, spriteB) {
+        var boundsA = spriteA.getBounds();
+        var boundsB = spriteB.getBounds();
+        var result = Phaser.Geom.Rectangle.Intersection(boundsA, boundsB);
+        return (result.width != 0 || result.height != 0)
+    }
+
+</script>
+</body>
+
+</html>
+
+

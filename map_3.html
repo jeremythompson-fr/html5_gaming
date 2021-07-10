@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <title>My Game</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        var config = {
+            type : Phaser.AUTO,
+            width: 1920,
+            height: 1080,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: true
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            audio: {
+                disableWebAudio: true
+            }
+        };
+
+        var operator;
+        var wall;
+      
+
+        var game = new Phaser.Game(config);
+
+        function preload ()
+        {
+            this.load.image('BG', 'assets/BG.jpg');
+            this.load.image('ground', 'assets/map_3/ground.png');
+            this.load.image('w1', 'assets/map_3/w1.png');
+            this.load.image('w2', 'assets/map_3/w2.png');
+            this.load.image('w3', 'assets/map_3/w3.png');
+            this.load.image('w4', 'assets/map_3/w4.png');
+            this.load.image('w6', 'assets/map_3/w6.png');
+            this.load.image('w7', 'assets/map_3/w7.png');
+            this.load.image('w8', 'assets/map_3/w8.png');
+            this.load.image('w10', 'assets/map_3/w10.png');
+            this.load.image('w11', 'assets/map_3/w11.png');
+            this.load.image('w12', 'assets/map_3/w12.png');
+            this.load.image('w13', 'assets/map_3/w13.png');
+            this.load.image('w14', 'assets/map_3/w14.png');
+            this.load.image('w15', 'assets/map_3/w15.png');
+            this.load.image('w16', 'assets/map_3/w16.png');
+            this.load.image('operator', 'assets/cockroach.png', { frameWidth: 32, frameHeight: 48 });
+            this.load.image('zone', 'assets/objets/zone.png');
+            this.load.image('folder', 'assets/objets/folder.png');
+
+            // ---------------
+            this.load.audio('theme',
+                'assets/music/ApocalypticTrailerMusic.wav'
+            );
+        }
+
+        function create ()
+        {
+            this.add.image(960, 540, 'BG');
+            this.add.image(960, 540, 'ground');
+
+            wall = this.physics.add.staticGroup();
+            wall.create(110, 794, 'w1'); 
+            wall.create(162, 559, 'w2'); 
+            wall.create(195.5, 281, 'w3'); 
+            wall.create(1075, 112.5, 'w4'); 
+            wall.create(615.5, 342, 'w6'); 
+            wall.create(615.5, 794, 'w7'); 
+            wall.create(615.5, 568, 'w8'); 
+            wall.create(1211, 657, 'w15'); 
+            wall.create(1211, 791.5, 'w16'); 
+            wall.create(1465.5, 342, 'w10'); 
+            wall.create(1211, 486, 'w11'); 
+            wall.create(1572.5, 572.5, 'w12'); 
+            wall.create(1538.5, 852, 'w13'); 
+            wall.create(757, 1023.5, 'w14'); 
+
+            folder = this.physics.add.staticGroup();
+            folder.create(271, 568, 'folder').setScale(0.1);
+            folder.create(960, 568, 'folder').setScale(0.1);
+            folder.create(1463, 568, 'folder').setScale(0.1);
+
+            zone = this.physics.add.staticGroup();
+            zone.create(85.5, 963, 'zone');
+            zone.create(1834.5, 173, 'zone');         
+
+            operator = this.physics.add.image(86, 964, 'operator').setScale(0.07);
+            
+            operator.setCollideWorldBounds(true);
+
+            cursors = this.input.keyboard.createCursorKeys();
+                      
+            // ---------------
+            var music = this.sound.add('theme');
+            music.play();
+
+            
+
+            this.physics.add.collider(operator, wall); 
+
+        }
+
+        function update ()
+        {
+            if (cursors.left.isDown)
+            {
+                operator.setVelocityX(-400);
+            }
+            else if (cursors.right.isDown)
+            {
+                operator.setVelocityX(400);
+            }
+            else{
+                operator.setVelocityX(0);
+            }
+
+            if (cursors.up.isDown)
+            {
+                operator.setVelocityY(-400);
+            }
+            else if (cursors.down.isDown)
+            {
+                operator.setVelocityY(400);
+            }
+            else
+            {
+                operator.setVelocityY(0);
+            }
+
+        }
+    </script>
+</body>
+</html>

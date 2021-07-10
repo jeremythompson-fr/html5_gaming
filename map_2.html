@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+
+    <link rel="icon" type="image/png" href="assets/cockroach.png" />
+    <title>Tor network</title>
+    <link href="style.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <script>
+        window.onload = function () {
+    var config = {
+        type: Phaser.AUTO,
+        width: 1920,
+        height: 1080,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 0 },
+                debug: true
+            }
+        },
+        scene: [niveau2, niveau3],
+        audio: {
+            disableWebAudio: true
+        }
+    };
+    var game = new Phaser.Game(config);
+    game.scene.start("niveau2");
+}
+
+var operator;
+var wall;
+var fairy;
+var cursors;
+// ADD FIREWALL
+var firewall
+
+// NIVEAU 2
+
+class niveau2 extends Phaser.Scene {
+    constructor() {
+        super({
+            key: 'niveau2'
+        });
+    }
+    preload() {
+        this.load.image('BG', 'assets/BG.jpg');
+        this.load.image('ground', 'assets/map_1/ground1.png');
+        this.load.image('w1', 'assets/map_1/W1.png');
+        this.load.image('w2', 'assets/map_1/W2.png');
+        this.load.image('w3', 'assets/map_1/W3.png');
+        this.load.image('w4', 'assets/map_1/W4.png');
+        this.load.image('w5', 'assets/map_1/W5.png');
+        this.load.image('w6', 'assets/map_1/W6.png');
+        this.load.image('operator', 'assets/cockroach.png', { frameWidth: 32, frameHeight: 48 });
+        // ---------------
+        this.load.audio('theme', 'assets/music/ApocalypticTrailerMusic.wav');
+        this.load.audio('sound_collect', 'assets/music/sound_collect.mp3');
+        this.load.audio('sound_gameover', 'assets/music/sound_gameover.mp3');
+
+        this.load.image('door2', 'assets/doors/door2.png');
+
+        this.load.image('button', './assets/buttons/play.png');
+        this.load.image('return', './assets/buttons/return.png');
+
+        // ADD FIREWALL
+        this.load.image('firewall', 'assets/objets/firewall.png');
+
+    }
+
+    create() {
+        this.add.image(960, 540, 'BG');
+        this.add.image(960, 540, 'ground');
+
+        wall = this.physics.add.staticGroup();
+        fairy = this.physics.add.staticGroup();
+
+        wall.create(314, 317, 'w1');
+        wall.create(990.5, 177.5, 'w2');
+        wall.create(1606.5, 347, 'w3');
+        wall.create(314, 763.5, 'w4');
+        wall.create(990.5, 903.5, 'w5');
+        wall.create(1606.5, 733.5, 'w6');
+        
+
+        // ADD FIREWALL
+        firewall = this.physics.add.staticGroup();
+        firewall.create(774, 312, 'firewall');
+        firewall.create(774, 768, 'firewall');
+        firewall.create(774, 540, 'firewall');
+        firewall.create(960, 426, 'firewall');
+        firewall.create(960, 654, 'firewall');
+        firewall.create(1142, 312, 'firewall');
+        firewall.create(1142, 768, 'firewall');
+        firewall.create(1142, 540, 'firewall');
+
+        // END FIREWALL
+
+
+        operator = this.physics.add.image(50, 540, 'operator').setScale(0.07);
+
+
+        operator.setCollideWorldBounds(true);
+
+        //ADD FIREWALL
+        this.physics.add.collider(operator, firewall, hitBomb); 
+
+        cursors = this.input.keyboard.createCursorKeys();
+
+        // ---------------
+        var music = this.sound.add('theme');
+        music.play();
+
+        this.physics.add.collider(operator, wall);
+
+        var button = this.add.image(130, 150, 'return').setScale(0.4, 0.4).setInteractive();
+        button.on('pointerdown', function () {
+            this.scene.start('home')
+        }, this);
+    }
+
+    update() {
+        if (cursors.left.isDown) {
+            operator.setVelocityX(-400);
+        }
+        else if (cursors.right.isDown) {
+            operator.setVelocityX(400);
+        }
+        else {
+            operator.setVelocityX(0);
+        }
+
+        if (cursors.up.isDown) {
+            operator.setVelocityY(-400);
+        }
+        else if (cursors.down.isDown) {
+            operator.setVelocityY(400);
+        }
+        else {
+            operator.setVelocityY(0);
+        }
+        if (cursors.space.isDown && checkOverlap(operator, door2) && score == 0) {
+            this.scene.start("niveau3");
+        }
+    }
+}
+
+// NIVEAU 3
+
+class niveau3 extends Phaser.Scene {
+    constructor() {
+        super({
+            key: 'niveau3'
+        });
+    }
+    preload() {
+        this.load.image('BG', 'assets/BG.jpg');
+        this.load.image('ground', 'assets/map_1/ground1.png');
+        this.load.image('w1', 'assets/map_1/W1.png');
+        this.load.image('w2', 'assets/map_1/W2.png');
+        this.load.image('w3', 'assets/map_1/W3.png');
+        this.load.image('w4', 'assets/map_1/W4.png');
+        this.load.image('w5', 'assets/map_1/W5.png');
+        this.load.image('w6', 'assets/map_1/W6.png');
+        this.load.image('operator', 'assets/cockroach.png', { frameWidth: 32, frameHeight: 48 });
+        // ---------------
+    }
+
+    create() {
+        this.add.image(960, 540, 'BG');
+        this.add.image(960, 540, 'ground');
+
+        wall = this.physics.add.staticGroup();
+        fairy = this.physics.add.staticGroup();
+
+        wall.create(314, 317, 'w1');
+        wall.create(990.5, 177.5, 'w2');
+        wall.create(1606.5, 347, 'w3');
+        wall.create(314, 763.5, 'w4');
+        wall.create(990.5, 903.5, 'w5');
+        wall.create(1606.5, 733.5, 'w6');
+
+        // ---------------
+        var music = this.sound.add('theme');
+        music.play();
+
+        this.physics.add.collider(operator, wall);
+
+        var style = { font: "bold 32px Arial", fill: "#fff" };
+        var text = this.add.text(900, 50, "NIVEAU 3", style);
+        text.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+
+        var button = this.add.image(130, 150, 'return').setScale(0.4, 0.4).setInteractive();
+        button.on('pointerdown', function () {
+            this.scene.start('home')
+        }, this);
+
+        //stars
+        stars = this.physics.add.staticGroup();
+
+        stars.create(1000, 250, 'star');
+        stars.create(800, 600, 'star');
+
+        this.physics.add.overlap(operator, stars, collectStar, null, this);
+
+        scoreText = this.add.text(600, 100, 'fichier(s) à récupérer : 2', { fontSize: '24px', fill: 'red' });
+        score = 2;
+
+      
+        this.physics.add.collider(operator, bombs, hitBomb, null, this);
+
+    }
+
+    update() {
+
+        if (cursors.left.isDown) {
+            operator.setVelocityX(-400);
+        }
+        else if (cursors.right.isDown) {
+            operator.setVelocityX(400);
+        }
+        else {
+            operator.setVelocityX(0);
+        }
+
+        if (cursors.up.isDown) {
+            operator.setVelocityY(-400);
+        }
+        else if (cursors.down.isDown) {
+            operator.setVelocityY(400);
+        }
+        else {
+            operator.setVelocityY(0);
+        }
+        if (cursors.space.isDown && checkOverlap(operator, door3) && score == 0) {
+            this.physics.pause();
+            var style = { font: "bold 32px Arial", fill: "#fff" };
+            textSuccess  = this.add.text(880, 300, "You won !", style);
+            textSuccess.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+
+            var music = this.sound.add('sound_win');
+            music.play();
+
+            buttonSuccess = this.add.image(980, 700, 'button').setScale(0.5, 0.5).setInteractive();
+            buttonSuccess.on('pointerdown', function () {
+            this.scene.start('home');
+            }, this);
+        }
+
+    }
+
+}
+
+
+
+    </script>
+</body>
+
+</html>
