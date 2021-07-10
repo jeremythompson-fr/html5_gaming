@@ -1,4 +1,4 @@
-You can find the instruction in the document HTML5_gaming.pdf
+You can find the instructions in the document HTML5_gaming.pdf
 
 1. Open the project on your localhost,
 
